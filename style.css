@@ -42,11 +42,34 @@ body {
     height: 50px;
     background: #494eea;
     color: #fff;
-    border:0;
+    border: 0;
     outline: 0;
     border-radius: 5px;
     box-shadow: 0 10px 10px rgba(73, 78, 234, 0.5);
     cursor: pointer;
     margin: 20px 0;
     font-weight: 500;
+}
+
+#imgBox {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#imgBox img {
+    max-width: 100%;
+    height: auto;
+}
+
+#errorText {
+    color: #d70022;
+    min-height: 18px;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.container input.error {
+    border-color: #d70022;
 }
