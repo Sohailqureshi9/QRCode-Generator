@@ -40,6 +40,19 @@
             <div id="groupApp" class="field-group">
                 <label for="appLink">App deep link</label>
                 <input type="text" id="appLink" placeholder="easypaisa://payment or https://your-app-link">
+
+                <label for="appRedirectMode">Redirect behavior</label>
+                <select id="appRedirectMode">
+                    <option value="direct">Direct (scan opens app/link)</option>
+                    <option value="via-redirect">Via redirect URL first</option>
+                </select>
+
+                <div id="redirectBaseWrap" class="redirect-wrap">
+                    <label for="redirectBase">Redirect endpoint URL</label>
+                    <input type="text" id="redirectBase" placeholder="https://yourdomain.com/r?to={target}">
+                    <p class="hint">Tip: use <strong>{target}</strong> placeholder, or we will append
+                        <strong>?to=</strong> automatically.</p>
+                </div>
             </div>
 
             <div id="groupWallet" class="field-group two-col">
@@ -65,6 +78,26 @@
                     <label for="walletAmount">Amount (optional)</label>
                     <input type="text" id="walletAmount" placeholder="2500">
                 </div>
+                <div class="full-width">
+                    <label for="walletScanMode">Scan behavior</label>
+                    <select id="walletScanMode">
+                        <option value="details" selected>Show payment details in QR</option>
+                        <option value="direct">Open wallet app directly</option>
+                        <option value="via-redirect">Open wallet via redirect URL</option>
+                    </select>
+                </div>
+                <div class="full-width" id="walletAppLinkWrap">
+                    <label for="walletAppLink">Wallet app link</label>
+                    <input type="text" id="walletAppLink"
+                        placeholder="easypaisa://pay?data={data} or https://wallet-link">
+                    <p class="hint">Use <strong>{data}</strong> to inject payment details.</p>
+                </div>
+                <div class="full-width redirect-wrap" id="walletRedirectWrap">
+                    <label for="walletRedirectBase">Wallet redirect endpoint URL</label>
+                    <input type="text" id="walletRedirectBase" placeholder="https://yourdomain.com/r?to={target}">
+                    <p class="hint">Use <strong>{target}</strong> placeholder, or we append <strong>?to=</strong>
+                        automatically.</p>
+                </div>
             </div>
 
             <div id="groupBank" class="field-group two-col">
@@ -87,6 +120,25 @@
                 <div class="full-width">
                     <label for="bankAmount">Amount (optional)</label>
                     <input type="text" id="bankAmount" placeholder="4500">
+                </div>
+                <div class="full-width">
+                    <label for="bankScanMode">Scan behavior</label>
+                    <select id="bankScanMode">
+                        <option value="details" selected>Show transfer details in QR</option>
+                        <option value="direct">Open banking app directly</option>
+                        <option value="via-redirect">Open banking app via redirect URL</option>
+                    </select>
+                </div>
+                <div class="full-width" id="bankAppLinkWrap">
+                    <label for="bankAppLink">Bank app link</label>
+                    <input type="text" id="bankAppLink" placeholder="bankapp://pay?data={data} or https://bank-link">
+                    <p class="hint">Use <strong>{data}</strong> to inject transfer details.</p>
+                </div>
+                <div class="full-width redirect-wrap" id="bankRedirectWrap">
+                    <label for="bankRedirectBase">Bank redirect endpoint URL</label>
+                    <input type="text" id="bankRedirectBase" placeholder="https://yourdomain.com/r?to={target}">
+                    <p class="hint">Use <strong>{target}</strong> placeholder, or we append <strong>?to=</strong>
+                        automatically.</p>
                 </div>
             </div>
 

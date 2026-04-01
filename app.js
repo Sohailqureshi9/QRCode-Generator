@@ -12,15 +12,28 @@ const groups = {
 
 const textInput = document.getElementById('textInput');
 const appLink = document.getElementById('appLink');
+const appRedirectMode = document.getElementById('appRedirectMode');
+const redirectBaseWrap = document.getElementById('redirectBaseWrap');
+const redirectBase = document.getElementById('redirectBase');
 const walletProvider = document.getElementById('walletProvider');
 const walletNumber = document.getElementById('walletNumber');
 const walletName = document.getElementById('walletName');
 const walletAmount = document.getElementById('walletAmount');
+const walletScanMode = document.getElementById('walletScanMode');
+const walletAppLinkWrap = document.getElementById('walletAppLinkWrap');
+const walletAppLink = document.getElementById('walletAppLink');
+const walletRedirectWrap = document.getElementById('walletRedirectWrap');
+const walletRedirectBase = document.getElementById('walletRedirectBase');
 const bankName = document.getElementById('bankName');
 const iban = document.getElementById('iban');
 const accountNumber = document.getElementById('accountNumber');
 const beneficiary = document.getElementById('beneficiary');
 const bankAmount = document.getElementById('bankAmount');
+const bankScanMode = document.getElementById('bankScanMode');
+const bankAppLinkWrap = document.getElementById('bankAppLinkWrap');
+const bankAppLink = document.getElementById('bankAppLink');
+const bankRedirectWrap = document.getElementById('bankRedirectWrap');
+const bankRedirectBase = document.getElementById('bankRedirectBase');
 const note = document.getElementById('note');
 
 const errorText = document.getElementById('errorText');
@@ -41,7 +54,74 @@ function showMode(mode) {
     Object.keys(groups).forEach((key) => {
         groups[key].classList.toggle('active', key === mode);
     });
+    updateVisibilityByMode();
     errorText.textContent = '';
+}
+
+function updateVisibilityByMode() {
+    const appRedirectActive = modeEl.value === 'app' && appRedirectMode.value === 'via-redirect';
+    redirectBaseWrap.classList.toggle('active', appRedirectActive);
+
+    const walletLinkActive = modeEl.value === 'wallet' && walletScanMode.value !== 'details';
+    const walletRedirectActive = modeEl.value === 'wallet' && walletScanMode.value === 'via-redirect';
+    walletAppLinkWrap.classList.toggle('active', walletLinkActive);
+    walletRedirectWrap.classList.toggle('active', walletRedirectActive);
+
+    const bankLinkActive = modeEl.value === 'bank' && bankScanMode.value !== 'details';
+    const bankRedirectActive = modeEl.value === 'bank' && bankScanMode.value === 'via-redirect';
+    bankAppLinkWrap.classList.toggle('active', bankLinkActive);
+    bankRedirectWrap.classList.toggle('active', bankRedirectActive);
+}
+
+function updateWalletHints() {
+    const provider = walletProvider.value;
+    const map = {
+        Easypaisa: {
+            number: '03XXXXXXXXX (Easypaisa number)',
+            appLink: 'easypaisa://pay?data={data}'
+        },
+        JazzCash: {
+            number: '03XXXXXXXXX (JazzCash number)',
+            appLink: 'jazzcash://pay?data={data}'
+        },
+        SadaPay: {
+            number: '03XXXXXXXXX or username',
+            appLink: 'sadapay://pay?data={data}'
+        },
+        NayaPay: {
+            number: '03XXXXXXXXX or NayaPay tag',
+            appLink: 'nayapay://pay?data={data}'
+        },
+        Other: {
+            number: 'Wallet number or ID',
+            appLink: 'walletapp://pay?data={data}'
+        }
+    };
+
+    const config = map[provider] || map.Other;
+    walletNumber.placeholder = config.number;
+    walletAppLink.placeholder = config.appLink + ' or https://wallet-link';
+}
+
+function looksLikeLink(value) {
+    return /^[a-z][a-z0-9+.-]*:\/\//i.test(value);
+}
+
+function makeRedirectUrl(base, target) {
+    const encodedTarget = encodeURIComponent(target);
+    if (base.includes('{target}')) {
+        return base.replace('{target}', encodedTarget);
+    }
+    const joiner = base.includes('?') ? '&' : '?';
+    return base + joiner + 'to=' + encodedTarget;
+}
+
+function applyDataTemplate(linkBase, payloadData) {
+    const encodedData = encodeURIComponent(payloadData);
+    if (linkBase.includes('{data}')) {
+        return linkBase.replace('{data}', encodedData);
+    }
+    return linkBase;
 }
 
 function setStatus(message) {
@@ -84,11 +164,25 @@ function buildPayload() {
         if (!value) {
             return { error: 'Enter an app link first.' };
         }
-        const looksLikeLink = /^[a-z][a-z0-9+.-]*:\/\//i.test(value);
-        if (!looksLikeLink) {
+        if (!looksLikeLink(value)) {
             return { error: 'Use a valid link format like easypaisa:// or https://.' };
         }
-        return { payload: value };
+
+        if (appRedirectMode.value === 'direct') {
+            return { payload: value };
+        }
+
+        const base = redirectBase.value.trim();
+        if (!base) {
+            return { error: 'Enter redirect endpoint URL for redirect mode.' };
+        }
+        if (!/^https?:\/\//i.test(base)) {
+            return { error: 'Redirect endpoint must start with http:// or https://.' };
+        }
+
+        const redirectPayload = makeRedirectUrl(base, value);
+
+        return { payload: redirectPayload };
     }
 
     if (mode === 'wallet') {
@@ -114,7 +208,33 @@ function buildPayload() {
         if (amount) lines.push('AMOUNT_PKR:' + amount);
         if (commonNote) lines.push('NOTE:' + commonNote);
 
-        return { payload: lines.join('\n') };
+        const payloadText = lines.join('\n');
+        if (walletScanMode.value === 'details') {
+            return { payload: payloadText };
+        }
+
+        const appLinkValue = walletAppLink.value.trim();
+        if (!appLinkValue) {
+            return { error: 'Enter wallet app link for selected scan behavior.' };
+        }
+        if (!looksLikeLink(appLinkValue)) {
+            return { error: 'Wallet app link must start with a valid scheme like easypaisa:// or https://.' };
+        }
+
+        const targetLink = applyDataTemplate(appLinkValue, payloadText);
+        if (walletScanMode.value === 'direct') {
+            return { payload: targetLink };
+        }
+
+        const redirectValue = walletRedirectBase.value.trim();
+        if (!redirectValue) {
+            return { error: 'Enter wallet redirect endpoint URL.' };
+        }
+        if (!/^https?:\/\//i.test(redirectValue)) {
+            return { error: 'Wallet redirect endpoint must start with http:// or https://.' };
+        }
+
+        return { payload: makeRedirectUrl(redirectValue, targetLink) };
     }
 
     if (mode === 'bank') {
@@ -143,7 +263,33 @@ function buildPayload() {
         if (amount) lines.push('AMOUNT_PKR:' + amount);
         if (commonNote) lines.push('NOTE:' + commonNote);
 
-        return { payload: lines.join('\n') };
+        const payloadText = lines.join('\n');
+        if (bankScanMode.value === 'details') {
+            return { payload: payloadText };
+        }
+
+        const appLinkValue = bankAppLink.value.trim();
+        if (!appLinkValue) {
+            return { error: 'Enter bank app link for selected scan behavior.' };
+        }
+        if (!looksLikeLink(appLinkValue)) {
+            return { error: 'Bank app link must start with a valid scheme like bankapp:// or https://.' };
+        }
+
+        const targetLink = applyDataTemplate(appLinkValue, payloadText);
+        if (bankScanMode.value === 'direct') {
+            return { payload: targetLink };
+        }
+
+        const redirectValue = bankRedirectBase.value.trim();
+        if (!redirectValue) {
+            return { error: 'Enter bank redirect endpoint URL.' };
+        }
+        if (!/^https?:\/\//i.test(redirectValue)) {
+            return { error: 'Bank redirect endpoint must start with http:// or https://.' };
+        }
+
+        return { payload: makeRedirectUrl(redirectValue, targetLink) };
     }
 
     return { error: 'Unsupported mode selected.' };
@@ -181,9 +327,17 @@ function generateQRCode() {
 function clearForm() {
     textInput.value = '';
     appLink.value = '';
+    appRedirectMode.value = 'direct';
+    redirectBase.value = '';
+    walletScanMode.value = 'details';
+    walletAppLink.value = '';
+    walletRedirectBase.value = '';
     walletNumber.value = '';
     walletName.value = '';
     walletAmount.value = '';
+    bankScanMode.value = 'details';
+    bankAppLink.value = '';
+    bankRedirectBase.value = '';
     bankName.value = '';
     iban.value = '';
     accountNumber.value = '';
@@ -195,6 +349,7 @@ function clearForm() {
     lastQrUrl = '';
     imgBox.classList.remove('visible');
     errorText.textContent = '';
+    updateVisibilityByMode();
     setStatus('Form reset.');
 }
 
@@ -223,6 +378,10 @@ function initTheme() {
 }
 
 modeEl.addEventListener('change', () => showMode(modeEl.value));
+appRedirectMode.addEventListener('change', updateVisibilityByMode);
+walletScanMode.addEventListener('change', updateVisibilityByMode);
+bankScanMode.addEventListener('change', updateVisibilityByMode);
+walletProvider.addEventListener('change', updateWalletHints);
 generateBtn.addEventListener('click', generateQRCode);
 clearBtn.addEventListener('click', clearForm);
 
@@ -262,4 +421,5 @@ qrImage.addEventListener('error', () => {
 });
 
 showMode(modeEl.value);
+updateWalletHints();
 initTheme();

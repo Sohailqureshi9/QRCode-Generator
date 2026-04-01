@@ -156,6 +156,40 @@ textarea:focus {
     animation: fade-in 0.22s ease;
 }
 
+.field-group.two-col {
+    display: none;
+}
+
+.field-group.two-col.active {
+    display: grid;
+}
+
+.redirect-wrap {
+    display: none;
+    margin-top: -4px;
+}
+
+#walletAppLinkWrap,
+#bankAppLinkWrap {
+    display: none;
+}
+
+#walletAppLinkWrap.active,
+#bankAppLinkWrap.active {
+    display: block;
+}
+
+.redirect-wrap.active {
+    display: block;
+}
+
+.hint {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: -5px 0 12px;
+    line-height: 1.35;
+}
+
 .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
