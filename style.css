@@ -88,6 +88,12 @@ h2 {
     letter-spacing: -0.02em;
 }
 
+h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    margin: 12px 0 10px;
+}
+
 h1 {
     font-size: 1.7rem;
     margin-bottom: 8px;
@@ -214,6 +220,7 @@ textarea:focus {
 .actions {
     display: flex;
     gap: 10px;
+    margin-bottom: 14px;
 }
 
 .btn {
@@ -313,6 +320,71 @@ body.dark .img-box {
     background: var(--soft-btn);
     color: var(--ink);
     margin-bottom: 10px;
+}
+
+.project-tools {
+    border-top: 1px dashed var(--line);
+    padding-top: 10px;
+}
+
+.tool-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.history-panel {
+    margin-top: 8px;
+    border-top: 1px dashed var(--line);
+    padding-top: 8px;
+}
+
+#historyList {
+    list-style: none;
+    max-height: 220px;
+    overflow: auto;
+    display: grid;
+    gap: 8px;
+}
+
+.history-item {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 10px;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+body.dark .history-item {
+    background: rgba(9, 21, 36, 0.7);
+}
+
+.history-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.history-label {
+    font-size: 0.83rem;
+    color: var(--muted);
+}
+
+.history-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.mini-btn {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
 }
 
 #statusText {

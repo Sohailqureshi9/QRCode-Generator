@@ -47,8 +47,17 @@ const generateBtn = document.getElementById('generateBtn');
 const clearBtn = document.getElementById('clearBtn');
 const copyPayloadBtn = document.getElementById('copyPayloadBtn');
 const copyImageLinkBtn = document.getElementById('copyImageLinkBtn');
+const templateName = document.getElementById('templateName');
+const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+const templateSelect = document.getElementById('templateSelect');
+const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+const deleteTemplateBtn = document.getElementById('deleteTemplateBtn');
+const shareConfigBtn = document.getElementById('shareConfigBtn');
+const historyList = document.getElementById('historyList');
 
 let lastQrUrl = '';
+const TEMPLATE_KEY = 'sheen_qr_templates_v1';
+const HISTORY_KEY = 'sheen_qr_history_v1';
 
 function showMode(mode) {
     Object.keys(groups).forEach((key) => {
@@ -301,6 +310,185 @@ function buildQrUrl(payload) {
     return 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&ecc=' + ecc + '&margin=12&data=' + encodeURIComponent(payload);
 }
 
+function getFormState() {
+    return {
+        mode: modeEl.value,
+        qrSize: qrSizeEl.value,
+        qrEcc: qrEccEl.value,
+        textInput: textInput.value,
+        appLink: appLink.value,
+        appRedirectMode: appRedirectMode.value,
+        redirectBase: redirectBase.value,
+        walletProvider: walletProvider.value,
+        walletNumber: walletNumber.value,
+        walletName: walletName.value,
+        walletAmount: walletAmount.value,
+        walletScanMode: walletScanMode.value,
+        walletAppLink: walletAppLink.value,
+        walletRedirectBase: walletRedirectBase.value,
+        bankName: bankName.value,
+        iban: iban.value,
+        accountNumber: accountNumber.value,
+        beneficiary: beneficiary.value,
+        bankAmount: bankAmount.value,
+        bankScanMode: bankScanMode.value,
+        bankAppLink: bankAppLink.value,
+        bankRedirectBase: bankRedirectBase.value,
+        note: note.value
+    };
+}
+
+function applyFormState(state) {
+    if (!state || typeof state !== 'object') return;
+
+    modeEl.value = state.mode || 'text';
+    qrSizeEl.value = state.qrSize || '340';
+    qrEccEl.value = state.qrEcc || 'M';
+    textInput.value = state.textInput || '';
+    appLink.value = state.appLink || '';
+    appRedirectMode.value = state.appRedirectMode || 'direct';
+    redirectBase.value = state.redirectBase || '';
+    walletProvider.value = state.walletProvider || 'Easypaisa';
+    walletNumber.value = state.walletNumber || '';
+    walletName.value = state.walletName || '';
+    walletAmount.value = state.walletAmount || '';
+    walletScanMode.value = state.walletScanMode || 'details';
+    walletAppLink.value = state.walletAppLink || '';
+    walletRedirectBase.value = state.walletRedirectBase || '';
+    bankName.value = state.bankName || '';
+    iban.value = state.iban || '';
+    accountNumber.value = state.accountNumber || '';
+    beneficiary.value = state.beneficiary || '';
+    bankAmount.value = state.bankAmount || '';
+    bankScanMode.value = state.bankScanMode || 'details';
+    bankAppLink.value = state.bankAppLink || '';
+    bankRedirectBase.value = state.bankRedirectBase || '';
+    note.value = state.note || '';
+
+    updateWalletHints();
+    showMode(modeEl.value);
+}
+
+function readJsonArray(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        return [];
+    }
+}
+
+function writeJsonArray(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function renderTemplateSelect() {
+    const templates = readJsonArray(TEMPLATE_KEY);
+    templateSelect.innerHTML = '<option value="">Select saved template</option>';
+
+    templates.forEach((item) => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        templateSelect.appendChild(option);
+    });
+}
+
+function formatTime(ts) {
+    return new Date(ts).toLocaleString();
+}
+
+function renderHistory() {
+    const items = readJsonArray(HISTORY_KEY);
+    historyList.innerHTML = '';
+
+    if (!items.length) {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.textContent = 'No generated QR history yet.';
+        historyList.appendChild(li);
+        return;
+    }
+
+    items.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+
+        const top = document.createElement('div');
+        top.className = 'history-top';
+
+        const label = document.createElement('div');
+        label.className = 'history-label';
+        label.textContent = item.mode.toUpperCase() + ' - ' + formatTime(item.createdAt);
+
+        const actions = document.createElement('div');
+        actions.className = 'history-actions';
+
+        const loadBtn = document.createElement('button');
+        loadBtn.className = 'mini-btn';
+        loadBtn.type = 'button';
+        loadBtn.textContent = 'Load';
+        loadBtn.addEventListener('click', () => {
+            applyFormState(item.state);
+            payloadPreview.value = item.payload || '';
+            setStatus('Loaded from history.');
+        });
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'mini-btn';
+        delBtn.type = 'button';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => {
+            const next = readJsonArray(HISTORY_KEY).filter((x) => x.id !== item.id);
+            writeJsonArray(HISTORY_KEY, next);
+            renderHistory();
+            setStatus('History item deleted.');
+        });
+
+        actions.appendChild(loadBtn);
+        actions.appendChild(delBtn);
+        top.appendChild(label);
+        top.appendChild(actions);
+        li.appendChild(top);
+
+        const snippet = document.createElement('div');
+        snippet.className = 'history-label';
+        snippet.textContent = (item.payload || '').slice(0, 90).replace(/\n/g, ' ');
+        li.appendChild(snippet);
+
+        historyList.appendChild(li);
+    });
+}
+
+function saveHistory(mode, payload, state) {
+    const current = readJsonArray(HISTORY_KEY);
+    const next = [{ id: Date.now(), mode, payload, state, createdAt: Date.now() }, ...current].slice(0, 8);
+    writeJsonArray(HISTORY_KEY, next);
+    renderHistory();
+}
+
+function buildShareLink() {
+    const json = JSON.stringify(getFormState());
+    const encoded = encodeURIComponent(json);
+    return window.location.origin + window.location.pathname + '#cfg=' + encoded;
+}
+
+function tryLoadSharedConfig() {
+    const hash = window.location.hash || '';
+    if (!hash.startsWith('#cfg=')) return;
+    try {
+        const encoded = hash.slice(5);
+        const json = decodeURIComponent(encoded);
+        const state = JSON.parse(json);
+        applyFormState(state);
+        setStatus('Shared config loaded.');
+    } catch (err) {
+        setStatus('Invalid shared config link.');
+    }
+}
+
 function generateQRCode() {
     const result = buildPayload();
 
@@ -319,8 +507,10 @@ function generateQRCode() {
     payloadPreview.value = payload;
     qrImage.src = qrUrl;
     downloadLink.href = qrUrl;
+    downloadLink.download = 'sheen-qr-' + Date.now() + '.png';
     lastQrUrl = qrUrl;
     imgBox.classList.add('visible');
+    saveHistory(modeEl.value, payload, getFormState());
     setStatus('QR generated successfully.');
 }
 
@@ -385,6 +575,53 @@ walletProvider.addEventListener('change', updateWalletHints);
 generateBtn.addEventListener('click', generateQRCode);
 clearBtn.addEventListener('click', clearForm);
 
+saveTemplateBtn.addEventListener('click', () => {
+    const name = templateName.value.trim();
+    if (!name) {
+        setStatus('Enter template name first.');
+        return;
+    }
+    const templates = readJsonArray(TEMPLATE_KEY);
+    templates.unshift({ id: String(Date.now()), name, state: getFormState() });
+    writeJsonArray(TEMPLATE_KEY, templates.slice(0, 20));
+    renderTemplateSelect();
+    templateName.value = '';
+    setStatus('Template saved.');
+});
+
+loadTemplateBtn.addEventListener('click', () => {
+    const id = templateSelect.value;
+    if (!id) {
+        setStatus('Select a template to load.');
+        return;
+    }
+    const templates = readJsonArray(TEMPLATE_KEY);
+    const selected = templates.find((item) => item.id === id);
+    if (!selected) {
+        setStatus('Template not found.');
+        return;
+    }
+    applyFormState(selected.state);
+    setStatus('Template loaded.');
+});
+
+deleteTemplateBtn.addEventListener('click', () => {
+    const id = templateSelect.value;
+    if (!id) {
+        setStatus('Select a template to delete.');
+        return;
+    }
+    const next = readJsonArray(TEMPLATE_KEY).filter((item) => item.id !== id);
+    writeJsonArray(TEMPLATE_KEY, next);
+    renderTemplateSelect();
+    setStatus('Template deleted.');
+});
+
+shareConfigBtn.addEventListener('click', () => {
+    const shareLink = buildShareLink();
+    copyText(shareLink, 'Share config link copied.', 'Clipboard denied by browser.');
+});
+
 copyPayloadBtn.addEventListener('click', () => {
     const data = payloadPreview.value.trim();
     if (!data) {
@@ -423,3 +660,6 @@ qrImage.addEventListener('error', () => {
 showMode(modeEl.value);
 updateWalletHints();
 initTheme();
+renderTemplateSelect();
+renderHistory();
+tryLoadSharedConfig();

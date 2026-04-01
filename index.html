@@ -51,7 +51,8 @@
                     <label for="redirectBase">Redirect endpoint URL</label>
                     <input type="text" id="redirectBase" placeholder="https://yourdomain.com/r?to={target}">
                     <p class="hint">Tip: use <strong>{target}</strong> placeholder, or we will append
-                        <strong>?to=</strong> automatically.</p>
+                        <strong>?to=</strong> automatically.
+                    </p>
                 </div>
             </div>
 
@@ -171,6 +172,24 @@
                 <button id="generateBtn" class="btn btn-primary" type="button">Generate QR Code</button>
                 <button id="clearBtn" class="btn btn-secondary" type="button">Clear</button>
             </div>
+
+            <div class="project-tools">
+                <h3>Project Tools</h3>
+                <div class="tool-row">
+                    <input type="text" id="templateName" placeholder="Template name (e.g. Shop Easypaisa)">
+                    <button id="saveTemplateBtn" class="btn btn-soft" type="button">Save Template</button>
+                </div>
+                <div class="tool-row two-col">
+                    <select id="templateSelect">
+                        <option value="">Select saved template</option>
+                    </select>
+                    <button id="loadTemplateBtn" class="btn btn-soft" type="button">Load Template</button>
+                </div>
+                <div class="tool-row two-col">
+                    <button id="deleteTemplateBtn" class="btn btn-soft" type="button">Delete Template</button>
+                    <button id="shareConfigBtn" class="btn btn-soft" type="button">Copy Share Config Link</button>
+                </div>
+            </div>
         </section>
 
         <section class="panel result-panel">
@@ -185,6 +204,11 @@
 
             <label for="payloadPreview">Encoded payload preview</label>
             <textarea id="payloadPreview" readonly placeholder="Your QR payload will appear here"></textarea>
+
+            <div class="history-panel">
+                <h3>Recent History</h3>
+                <ul id="historyList"></ul>
+            </div>
         </section>
     </main>
     <script src="app.js" defer></script>
