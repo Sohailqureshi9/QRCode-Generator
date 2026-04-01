@@ -40,6 +40,7 @@ const errorText = document.getElementById('errorText');
 const statusText = document.getElementById('statusText');
 const imgBox = document.getElementById('imgBox');
 const qrImage = document.getElementById('qrCodeImage');
+const qrEmptyState = document.getElementById('qrEmptyState');
 const downloadLink = document.getElementById('downloadLink');
 const payloadPreview = document.getElementById('payloadPreview');
 
@@ -310,6 +311,13 @@ function buildQrUrl(payload) {
     return 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&ecc=' + ecc + '&margin=12&data=' + encodeURIComponent(payload);
 }
 
+function setQrHasImage(hasImage) {
+    imgBox.classList.toggle('has-image', hasImage);
+    if (!hasImage) {
+        qrEmptyState.style.display = 'block';
+    }
+}
+
 function getFormState() {
     return {
         mode: modeEl.value,
@@ -495,6 +503,8 @@ function generateQRCode() {
     if (result.error) {
         errorText.textContent = result.error;
         imgBox.classList.remove('visible');
+        setQrHasImage(false);
+        qrImage.removeAttribute('src');
         payloadPreview.value = '';
         setStatus('');
         return;
@@ -505,6 +515,7 @@ function generateQRCode() {
 
     errorText.textContent = '';
     payloadPreview.value = payload;
+    setQrHasImage(false);
     qrImage.src = qrUrl;
     downloadLink.href = qrUrl;
     downloadLink.download = 'sheen-qr-' + Date.now() + '.png';
@@ -535,8 +546,9 @@ function clearForm() {
     bankAmount.value = '';
     note.value = '';
     payloadPreview.value = '';
-    qrImage.src = '';
+    qrImage.removeAttribute('src');
     lastQrUrl = '';
+    setQrHasImage(false);
     imgBox.classList.remove('visible');
     errorText.textContent = '';
     updateVisibilityByMode();
@@ -652,9 +664,15 @@ document.addEventListener('keydown', (event) => {
 });
 
 qrImage.addEventListener('error', () => {
+    qrImage.removeAttribute('src');
+    setQrHasImage(false);
     imgBox.classList.remove('visible');
     errorText.textContent = 'QR service is unavailable right now. Please check internet and try again.';
     setStatus('');
+});
+
+qrImage.addEventListener('load', () => {
+    setQrHasImage(true);
 });
 
 showMode(modeEl.value);
@@ -663,3 +681,4 @@ initTheme();
 renderTemplateSelect();
 renderHistory();
 tryLoadSharedConfig();
+setQrHasImage(false);

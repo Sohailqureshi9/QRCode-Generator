@@ -397,6 +397,7 @@ body.dark .chip-btn {
     opacity: 0.6;
     transform: scale(0.98);
     transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    overflow: hidden;
 }
 
 body.dark .img-box {
@@ -410,10 +411,37 @@ body.dark .img-box {
 }
 
 #qrCodeImage {
+    display: none;
     width: 92%;
     max-width: 330px;
     height: auto;
+}
+
+.img-box.has-image #qrCodeImage {
     display: block;
+}
+
+.qr-empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.qr-empty-icon {
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 10px;
+    border-radius: 14px;
+    border: 1px dashed rgba(15, 124, 169, 0.35);
+    background:
+        linear-gradient(90deg, rgba(15, 124, 169, 0.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(15, 124, 169, 0.08) 1px, transparent 1px),
+        linear-gradient(140deg, rgba(15, 124, 169, 0.12), rgba(29, 167, 128, 0.08));
+    background-size: 12px 12px, 12px 12px, 100% 100%;
+}
+
+.img-box.has-image .qr-empty {
+    display: none;
 }
 
 .btn-download {
