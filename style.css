@@ -1,17 +1,20 @@
 :root {
-    --bg-1: #f4f8ff;
-    --bg-2: #e9fff7;
-    --ink: #1b2234;
-    --muted: #586079;
-    --panel: rgba(255, 255, 255, 0.86);
+    --bg-1: #e9f3fb;
+    --bg-2: #e9f6f1;
+    --bg-3: #f9f0e5;
+    --ink: #1a2335;
+    --muted: #596b83;
+    --panel: rgba(255, 255, 255, 0.9);
     --line: rgba(16, 24, 40, 0.15);
-    --primary: #005f8f;
-    --primary-dark: #014665;
-    --accent: #00a67e;
+    --primary: #0f7ca9;
+    --primary-dark: #165f81;
+    --accent: #1da780;
     --danger: #c20f2f;
     --ok: #067647;
-    --soft-btn: rgba(0, 95, 143, 0.09);
-    --shadow: 0 16px 45px rgba(9, 24, 48, 0.15);
+    --soft-btn: rgba(15, 124, 169, 0.1);
+    --shadow: 0 18px 44px rgba(15, 33, 56, 0.15);
+    --shadow-soft: 0 10px 22px rgba(17, 38, 66, 0.1);
+    --glass-top: rgba(255, 255, 255, 0.64);
 }
 
 * {
@@ -24,55 +27,67 @@ body {
     min-height: 100vh;
     font-family: 'Outfit', sans-serif;
     color: var(--ink);
-    background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-2) 56%, var(--bg-3));
     padding: 28px;
     position: relative;
     overflow-x: hidden;
 }
 
 body.dark {
-    --bg-1: #0f1728;
-    --bg-2: #122636;
-    --ink: #e6edf8;
-    --muted: #a0b4d6;
-    --panel: rgba(11, 25, 42, 0.8);
-    --line: rgba(153, 184, 230, 0.28);
-    --primary: #1f9dd8;
-    --primary-dark: #1177aa;
-    --accent: #18b58e;
+    --bg-1: #1a2434;
+    --bg-2: #213748;
+    --ink: #edf3ff;
+    --muted: #a9bedc;
+    --panel: rgba(23, 38, 57, 0.84);
+    --line: rgba(176, 201, 236, 0.26);
+    --primary: #33a4d1;
+    --primary-dark: #2a87ad;
+    --accent: #2aba90;
     --danger: #ff5f76;
     --ok: #39d98a;
-    --soft-btn: rgba(31, 157, 216, 0.2);
-    --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+    --soft-btn: rgba(43, 154, 201, 0.22);
+    --shadow: 0 16px 42px rgba(0, 0, 0, 0.33);
+    --glass-top: rgba(255, 255, 255, 0.06);
 }
 
 .page-bg {
     position: fixed;
     inset: 0;
     background:
-        radial-gradient(circle at 12% 18%, rgba(0, 166, 126, 0.2), transparent 32%),
-        radial-gradient(circle at 88% 10%, rgba(0, 95, 143, 0.24), transparent 30%),
-        radial-gradient(circle at 74% 84%, rgba(255, 151, 48, 0.2), transparent 28%);
+        radial-gradient(circle at 12% 18%, rgba(29, 167, 128, 0.2), transparent 36%),
+        radial-gradient(circle at 88% 10%, rgba(15, 124, 169, 0.22), transparent 34%),
+        radial-gradient(circle at 74% 84%, rgba(245, 167, 74, 0.18), transparent 32%),
+        linear-gradient(115deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0));
     pointer-events: none;
+    animation: bg-shift 14s ease-in-out infinite alternate;
 }
 
 .app-shell {
-    max-width: 1080px;
+    max-width: 1140px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1.25fr 0.95fr;
     gap: 22px;
     position: relative;
     z-index: 1;
+    align-items: start;
 }
 
 .panel {
-    background: var(--panel);
-    border: 1px solid rgba(255, 255, 255, 0.75);
+    background:
+        linear-gradient(175deg, var(--glass-top), rgba(255, 255, 255, 0) 38%),
+        var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.66);
     backdrop-filter: blur(10px);
-    border-radius: 22px;
+    border-radius: 24px;
     box-shadow: var(--shadow);
     padding: 22px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 42px rgba(15, 33, 56, 0.18);
 }
 
 .panel-head {
@@ -97,17 +112,24 @@ h3 {
 h1 {
     font-size: 1.7rem;
     margin-bottom: 8px;
+    line-height: 1.12;
+    background: linear-gradient(100deg, var(--ink), color-mix(in srgb, var(--primary) 35%, var(--ink) 65%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 h2 {
     font-size: 1.3rem;
     margin-bottom: 12px;
+    line-height: 1.2;
+    color: color-mix(in srgb, var(--ink) 86%, var(--primary) 14%);
 }
 
 .subhead {
     color: var(--muted);
     margin-bottom: 18px;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 label {
@@ -130,27 +152,39 @@ select,
 textarea {
     width: 100%;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 12px 14px;
     font-size: 0.98rem;
     color: var(--ink);
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.96);
     margin-bottom: 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 2px rgba(18, 45, 77, 0.05);
 }
 
 body.dark input,
 body.dark select,
 body.dark textarea {
-    background: rgba(8, 21, 36, 0.85);
+    background: rgba(19, 33, 49, 0.88);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 36px;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: rgba(0, 95, 143, 0.55);
-    box-shadow: 0 0 0 3px rgba(0, 95, 143, 0.14);
+    border-color: rgba(12, 111, 150, 0.55);
+    box-shadow: 0 0 0 3px rgba(15, 124, 169, 0.15), 0 6px 14px rgba(15, 124, 169, 0.14);
+    transform: translateY(-1px);
 }
 
 .field-group {
@@ -221,11 +255,12 @@ textarea:focus {
     display: flex;
     gap: 10px;
     margin-bottom: 14px;
+    padding-top: 2px;
 }
 
 .btn {
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 12px 16px;
     font-size: 0.96rem;
     font-weight: 600;
@@ -234,24 +269,27 @@ textarea:focus {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.18s ease, filter 0.18s ease;
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
 .btn:hover {
     transform: translateY(-1px);
     filter: brightness(1.03);
+    box-shadow: var(--shadow-soft);
 }
 
 .btn-primary {
     flex: 1;
-    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(120deg, var(--primary) 5%, var(--primary-dark));
     color: #ffffff;
+    box-shadow: 0 10px 22px rgba(22, 95, 129, 0.3);
 }
 
 .btn-secondary {
     width: 120px;
-    background: #eaf1f8;
+    background: linear-gradient(180deg, #f6f9fd, #e7eef8);
     color: #2a3858;
+    border: 1px solid rgba(24, 55, 95, 0.1);
 }
 
 body.dark .btn-secondary {
@@ -261,7 +299,7 @@ body.dark .btn-secondary {
 
 .chip-btn {
     border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.78);
     color: var(--ink);
     border-radius: 999px;
     padding: 9px 14px;
@@ -281,15 +319,15 @@ body.dark .chip-btn {
 
 .img-box {
     min-height: 360px;
-    border: 1px dashed rgba(0, 95, 143, 0.35);
-    border-radius: 18px;
-    background: linear-gradient(150deg, #ffffff, #f0f6ff);
+    border: 1px dashed rgba(12, 111, 150, 0.38);
+    border-radius: 20px;
+    background: linear-gradient(148deg, #ffffff, #edf6ff 58%, #e9fbf5);
     display: grid;
     place-items: center;
     margin-bottom: 14px;
     opacity: 0.6;
     transform: scale(0.98);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 body.dark .img-box {
@@ -299,6 +337,7 @@ body.dark .img-box {
 .img-box.visible {
     opacity: 1;
     transform: scale(1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 12px 28px rgba(20, 63, 98, 0.18);
 }
 
 #qrCodeImage {
@@ -310,9 +349,10 @@ body.dark .img-box {
 
 .btn-download {
     margin-bottom: 10px;
-    background: linear-gradient(115deg, #0e8b68, var(--accent));
+    background: linear-gradient(115deg, #1e9476, var(--accent));
     color: #ffffff;
     width: 100%;
+    box-shadow: 0 10px 20px rgba(29, 167, 128, 0.28);
 }
 
 .btn-soft {
@@ -320,11 +360,19 @@ body.dark .img-box {
     background: var(--soft-btn);
     color: var(--ink);
     margin-bottom: 10px;
+    border: 1px solid rgba(12, 111, 150, 0.14);
 }
 
 .project-tools {
-    border-top: 1px dashed var(--line);
-    padding-top: 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 16px;
+    padding: 12px;
+    margin-top: 6px;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+body.dark .project-tools {
+    background: rgba(12, 24, 39, 0.45);
 }
 
 .tool-row {
@@ -336,8 +384,14 @@ body.dark .img-box {
 
 .history-panel {
     margin-top: 8px;
-    border-top: 1px dashed var(--line);
-    padding-top: 8px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 16px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.32);
+}
+
+body.dark .history-panel {
+    background: rgba(12, 24, 39, 0.42);
 }
 
 #historyList {
@@ -353,6 +407,7 @@ body.dark .img-box {
     border-radius: 10px;
     padding: 9px 10px;
     background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 16px rgba(17, 38, 66, 0.08);
 }
 
 body.dark .history-item {
@@ -385,6 +440,12 @@ body.dark .history-item {
     padding: 4px 8px;
     font-size: 0.8rem;
     cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.mini-btn:hover {
+    background: rgba(12, 111, 150, 0.1);
+    transform: translateY(-1px);
 }
 
 #statusText {
@@ -399,6 +460,25 @@ body.dark .history-item {
     resize: vertical;
     font-family: Consolas, 'Courier New', monospace;
     font-size: 0.88rem;
+}
+
+#historyList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#historyList::-webkit-scrollbar-thumb {
+    background: rgba(95, 111, 134, 0.4);
+    border-radius: 20px;
+}
+
+@keyframes bg-shift {
+    0% {
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        transform: scale(1.03) translateY(-8px);
+    }
 }
 
 @keyframes fade-in {
@@ -430,7 +510,7 @@ body.dark .history-item {
 
     .panel {
         padding: 16px;
-        border-radius: 16px;
+        border-radius: 18px;
     }
 
     h1 {
